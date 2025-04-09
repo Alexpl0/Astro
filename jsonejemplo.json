@@ -1,0 +1,18 @@
+{
+    "id": 1,
+    "nombre": "Prueba de Inventario",
+    "marca": "Dell",
+    "modelo": "Inspiron 15",
+    "estado": "Nuevo",
+    "descripcion": "Laptop para uso general",
+    "precio": 899.99,
+    "ubicacion": {
+        "id": 1,
+        "nombre": "Sala 1"
+    },
+    "categoria": {
+        "id": 1,
+        "nombre": "Monitor",
+        "descripcion": "Dispositivo de salida que muestra visualmente la información procesada por una computadora."
+    }
+}

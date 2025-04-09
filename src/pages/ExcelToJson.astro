@@ -1,0 +1,76 @@
+---
+import Welcome from '../components/Welcome.astro';
+import Layout from '../layouts/Layout.astro';
+import '../css/styles.css';
+import '../css/header.css';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor de Excel a JSON</title>
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="header__logo">Instituto Mexicano del Transporte</a>
+        <ion-icon name="menu-outline" class="header__toggle" id="nav-toggle"></ion-icon>
+        <nav class="nav" id="nav-menu">
+            <div class="nav__content bd-grid">
+                <ion-icon name="close-outline" class="nav__close" id="nav-close"></ion-icon>
+                <div class="nav__perfil">
+                    <div class="nav__img">
+                        <img src="/media/logo.jpg" alt="LogoIMT">
+                    </div>
+                    <div>
+                        <a href="#" class="nav__name">Instituto Mexicano del Transporte</a>
+                    </div>
+                </div> 
+                <div class="nav__menu">
+                    <ul class="nav__list">
+                        <li class="nav__item"><a href="/" class="nav__link active">Home</a></li>
+                        <li class="nav__item"><a href="/scanQr" class="nav__link">Inventario</a></li>
+                        <li class="nav__item"><a href="/salas" class="nav__link">Salas</a></li>
+                        <li class="nav__item"><a href="/newQR" class="nav__link">Alta Producto</a></li>
+                        <li class="nav__item"><a href="/ExcelToJson" class="nav__link">ExcelToJson</a></li>
+                        <li class="nav__item"><a href="/DataTables" class="nav__link">Reportes</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div id="containerExcel">
+        <h1>Convertir de Excel a JSON</h1>
+        <p>Selecciona un archivo Excel (.xlsx, .xls) para convertirlo a formato JSON:</p>
+        
+        <p>Ejemplo de Tabla Valida</p>
+        <div>
+            <img src="../media/EjemploTabla.png" class="responsive-image" id="TablaEjemplo" alt="Ejemplo de Tabla" />
+        </div>
+        
+        <p id="downloadExcel"><a id="textExcel" href="../media/Prueba Inventario.xlsx" download>Descargar archivo de ejemplo</a></p>
+        
+        <label for="excelFile">Selecciona un archivo Excel:</label>
+        <input type="file" id="excelFile" accept=".xlsx, .xls" title="Selecciona un archivo Excel" />
+        <p id="fileInfo"></p>
+        <button id="convertBtn">Convertir a JSON</button>
+        <button id="putJson">Subir la Informacion putJson</button>
+        
+        <div>
+            <h3>Resultado JSON:</h3>
+            <textarea id="jsonOutput" readonly title="Resultado JSON" placeholder="El resultado JSON aparecerá aquí"></textarea>
+        </div>
+        
+        <button id="downloadBtn" disabled>Descargar JSON</button>
+    </div>
+
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/ExcelToJson.js"></script>
+    <script src="../js/header.js"></script>
+    <script src="../js/index.js"></script>
+    <script is:inline src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
+</body>
+</html>
