@@ -1,3 +1,6 @@
+// Variable global para almacenar los datos procesados
+let processedData = [];
+
 // Espera a que el DOM esté completamente cargado antes de ejecutar el código
 document.addEventListener('DOMContentLoaded', function() {
     // Obtiene referencias a los elementos HTML mediante sus IDs
@@ -11,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Declaración de variables para usar en todo el ámbito de la función
     let workbook = null;  // Almacenará el libro Excel cargado
     let fileName = '';    // Guardará el nombre del archivo sin extensión
-    let processedData = []; // Variable para almacenar los datos procesados
+    // Nota: processedData ahora es global
     
     // Deshabilitar el botón putJson inicialmente
     putJsonBtn.disabled = true;
@@ -75,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 for (let i = 0; i < result.length; i++) {
                     // Convierte el campo 'ubicacion' a un objeto con el ID de la ubicación
                     result[i] = {
-                        'id': parseInt(result[i].id) || 0, // Convierte el ID a entero (long) con valor predeterminado 0 si es inválido
                         'nombre': result[i].nombre,
                         'marca': result[i].marca,
                         'modelo': result[i].modelo,
@@ -149,63 +151,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mostrar indicador de carga
         Swal.fire({
             title: 'Enviando datos...',
-            text: 'Actualizando productos en la base de datos',
+            text: 'Creando productos en la base de datos',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
             }
         });
         
-        // Función para enviar los datos a la API mediante PUT
-        async function updateProducto(producto) {
-            try {
-                const response = await fetch(`http://localhost:8080/productos/${producto.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(producto)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Error al actualizar producto ID ${producto.id}: ${response.statusText}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error(`Error al actualizar producto:`, error);
-                throw error;
-            }
-        }
-        
-        // Enviar productos a la API
-        async function enviarProductosAPI() {
-            const resultados = {
-                exitosos: 0,
-                fallidos: 0,
-                errores: []
-            };
-            
-            for (const producto of processedData) {
-                try {
-                    await updateProducto(producto);
-                    resultados.exitosos++;
-                } catch (error) {
-                    resultados.fallidos++;
-                    resultados.errores.push(`ID ${producto.id}: ${error.message}`);
-                }
-            }
-            
-            return resultados;
-        }
-        
         // Ejecutar el envío a la API y mostrar resultados
         enviarProductosAPI()
             .then(resultados => {
                 Swal.fire({
-                    title: 'Actualización de productos',
+                    title: 'Creación de productos',
                     html: `
-                        <p>Productos actualizados: ${resultados.exitosos}</p>
+                        <p>Productos creados: ${resultados.exitosos}</p>
                         <p>Productos con error: ${resultados.fallidos}</p>
                         ${resultados.errores.length > 0 ? 
                             `<div style="max-height: 200px; overflow-y: auto; text-align: left; margin-top: 15px;">
@@ -219,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 Swal.fire({
                     title: 'Error',
-                    text: `Error al actualizar productos: ${error.message}`,
+                    text: `Error al crear productos: ${error.message}`,
                     icon: 'error'
                 });
             });
@@ -274,3 +233,47 @@ document.addEventListener('DOMContentLoaded', function() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 });
+
+// Función para enviar un solo producto a la API mediante POST
+async function crearProducto(producto) {
+    try {
+        const response = await fetch('http://localhost:8080/productos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(producto)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error al crear producto: ${response.statusText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error(`Error al crear producto:`, error);
+        throw error;
+    }
+}
+
+// Enviar productos a la API uno por uno
+async function enviarProductosAPI() {
+    const resultados = {
+        exitosos: 0,
+        fallidos: 0,
+        errores: []
+    };
+    
+    // Procesar cada producto individualmente
+    for (const producto of processedData) {
+        try {
+            await crearProducto(producto);
+            resultados.exitosos++;
+        } catch (error) {
+            resultados.fallidos++;
+            resultados.errores.push(`${producto.marca} ${producto.modelo}: ${error.message}`);
+        }
+    }
+    
+    return resultados;
+}

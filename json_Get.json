@@ -1,0 +1,21 @@
+[
+    {
+        "id": 1,
+        "nombre": "Primer Ejemplo",
+        "marca": "Asus",
+        "modelo": "Primer Ejemplo",
+        "estado": "Nuevo",
+        "descripcion": "Primer Ejemplo",
+        "precio": 1299.0,
+        "fecha": "2025-04-08",
+        "ubicacion": {
+            "id": 2,
+            "nombre": "Sala 2"
+        },
+        "categoria": {
+            "id": 1,
+            "nombre": "Mouse",
+            "descripcion": null
+        }
+    }
+]
