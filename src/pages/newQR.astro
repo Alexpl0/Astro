@@ -5,101 +5,84 @@ import '../css/styles.css';
 import '../css/header.css';
 ---
 
+<Layout>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- jQuery and Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  
-  <!-- Include Font Awesome CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-  <!-- Include custom CSS -->
-  <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="../css/header.css">
-
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.1/html2canvas.min.js"></script>
-</head>
-
-<body>
-  <header class="header">
-    <a href="#" class="header__logo">Instituto Mexicano del Transporte</a>
-    <ion-icon name="menu-outline" class="header__toggle" id="nav-toggle"></ion-icon>
-    <nav class="nav" id="nav-menu">
-      <div class="nav__content bd-grid">
-        <ion-icon name="close-outline" class="nav__close" id="nav-close"></ion-icon>
-        <div class="nav__perfil">
-          <div class="nav__img">
-            <img src="/media/logo.jpg" alt="LogoIMT">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        </head> 
+    <body>
+      <header class="header">
+        <a href="#" class="header__logo">Instituto Mexicano del Transporte</a>
+        <ion-icon name="menu-outline" class="header__toggle" id="nav-toggle"></ion-icon>
+        <nav class="nav" id="nav-menu">
+          <div class="nav__content bd-grid">
+            <ion-icon name="close-outline" class="nav__close" id="nav-close"></ion-icon>
+            <div class="nav__perfil">
+              <div class="nav__img">
+                <img src="/media/logo.jpg" alt="logoIMT">
+              </div>
+              <div>
+                <a href="#" class="nav__name">Instituto Mexicano del Transporte</a>
+              </div>
+            </div> 
+            <div class="nav__menu">
+              <ul class="nav__list">
+                <li class="nav__item"><a href="/" class="nav__link ">Home</a></li>
+                <li class="nav__item"><a href="/scanQr" class="nav__link">Inventario</a></li>
+                <li class="nav__item"><a href="/salas" class="nav__link">Salas</a></li>
+                <li class="nav__item"><a href="/newQR" class="nav__link active">Alta Producto</a></li>
+                <li class="nav__item"><a href="/ExcelToJson" class="nav__link">ExcelToJson</a></li>
+                <li class="nav__item"><a href="/DataTables" class="nav__link">Reportes</a></li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <a href="#" class="nav__name">Instituto Mexicano del Transporte</a>
-          </div>
-        </div> 
-        <div class="nav__menu">
-          <ul class="nav__list">
-            <li class="nav__item"><a href="/" class="nav__link active">Home</a></li>
-            <li class="nav__item"><a href="/scanQr" class="nav__link">Inventario</a></li>
-            <li class="nav__item"><a href="/salas" class="nav__link">Salas</a></li>
-            <li class="nav__item"><a href="/newQR" class="nav__link">Alta Producto</a></li>
-            <li class="nav__item"><a href="/ExcelToJson" class="nav__link">ExcelToJson</a></li>
-            <li class="nav__item"><a href="/DataTables" class="nav__link">Reportes</a></li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </header>
+        </nav>
+    </header>
+
 
   <h1>Registro de Nuevo Producto</h1>
 
-  <button id="new-product-button" class="btn btn-primary">Ingresar Nuevo Producto</button>
+  <button id="newInventory">Ingresar Nuevo Producto</button>
   <div id="form-container"></div>
 
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title" id="exampleModalLongTitle">QR Code</h1>
-        </div>
-        <div class="modal-body">
-          <!-- Aqui dentro va el QR Generado-->
-          <div class="row justify-content-center mt-4">
-            <div class="col-md-6 text-center">
-              <div id="qrcode-container"></div>
-            </div>
-          </div>
-          <button id="download-button" class="btn btn-success" style="display: block">
-            <i class="fas fa-download"></i> Download QR Code with Logo
-          </button>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="close" data-dismiss="modal">Close</button>
-        </div>
-      </div>
+  <!-- Aqui dentro va el QR Generado-->
+  <div>
+    <div>
+      <div id="qrcode-container"></div>
     </div>
   </div>
 
-  <button id="buttonHome" onclick="buttonHome()">Regresar</button>
 
-  <!-- ===== JS ===== -->
-  <script defer src="../js/newQR.js"></script>
-  <script src="../js/index.js"></script>
-  <script src="../js/form.js"></script>
-  <script src="../js/header.js"></script>
+  <button id="buttonHome">Regresar</button>
 
-  <!-- ===== IONICONS ===== -->
-  <script is:inline src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
 </body>
 </html>
+</Layout>
+
+<!-- Load QR Code library first -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/qrcode-reader/qrcode-reader.min.js"></script>
+<script src="../assets/plugins/qrCode.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/qrcode-reader@1.0.4/dist/index.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<!-- Add this before your newQR.js script -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Import client scripts at the end -->
+
+<script src="../js/newQR.js"></script>
+<script src="../js/header.js"></script>
+<script src="../js/form.js"></script>
+<script src="../js/index.js"></script>
+
+<!-- Simple event listener for newInventory button -->
+
+  <!-- ===== IONICONS ===== -->
+<script is:inline src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>

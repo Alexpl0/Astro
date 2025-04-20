@@ -62,35 +62,96 @@ import '../css/header.css';
             </nav>
         </header> 
 
-        <div class="container my-4">
-            <div class="row">
-                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                    <table id="datatable_users" class="table table-striped">
-                        <caption>
-                            DataTable.js Demo
-                        </caption>
-                        <thead>
-                            <tr>
-                                <th class="centered">#</th>
-                                <th class="centered">Nombre</th>
-                                <th class="centered">Marca</th>
-                                <th class="centered">Modelo</th>
-                                <th class="centered">Estado</th>
-                                <th class="centered">Descripcion</th>
-                                <th class="centered">Precio</th>
-                                <th class="centered">Fecha de Inventario</th>
-                                <th class="centered">Categoria</th>
-                                <th class="centered">Ubicacion</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody_users"></tbody>
-                    </table>
+<section>
+    <div class="container text-center mt-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-center mb-4">Selecciona una opción</h1>
+                <div class="d-flex justify-content-center gap-4 flex-wrap">
+                    <button id="btnProductos" class="btn btn-primary btn-lg">
+                        Ver Productos
+                    </button>
+                    <button id="btnInventario" class="btn btn-success btn-lg">
+                        Ver Inventario
+                    </button>
                 </div>
             </div>
         </div>
-        <form id="editFormContainer"></form>
+    </div>
+</section>
+
+<div id="productosTable" class="container my-4" style="display: none;">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-3">Tabla de Productos</h2>
+            <table id="datatable_productos" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="centered">#</th>
+                        <th class="centered">Nombre</th>
+                        <th class="centered">Marca</th>
+                        <th class="centered">Modelo</th>
+                        <th class="centered">Estado</th>
+                        <th class="centered">Descripcion</th>
+                        <th class="centered">Precio</th>
+                        <th class="centered">Fecha de Inventario</th>
+                        <th class="centered">Categoria</th>
+                        <th class="centered">Ubicacion</th>
+                        <th class="centered">Acciones</th> <!-- Nueva columna para los botones -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody_productos">                  
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="inventarioTable" class="container my-4" style="display: none;">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-3">Tabla de Inventario</h2>
+            <table id="datatable_inventario" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="centered">#</th>
+                        <th class="centered">Producto</th>
+                        <th class="centered">Estado Físico</th>
+                        <th class="centered">Estado Operativo</th>
+                        <th class="centered">Observaciones</th>
+                        <th class="centered">Fecha</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody_inventario"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<form id="editFormContainer"></form>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const btnProductos = document.getElementById('btnProductos');
+                const btnInventario = document.getElementById('btnInventario');
+                const productosTable = document.getElementById('productosTable');
+                const inventarioTable = document.getElementById('inventarioTable');
+
+                btnProductos.addEventListener('click', function() {
+                    productosTable.style.display = 'block';
+                    inventarioTable.style.display = 'none';
+                });
+
+                btnInventario.addEventListener('click', function() {
+                    productosTable.style.display = 'none';
+                    inventarioTable.style.display = 'block';
+                });
+            });
+        </script>
     </body>
 </Layout>
+
+
 
 <!-- Load QR Code library first -->
 <script is:inline src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -102,6 +163,11 @@ import '../css/header.css';
 <script is:inline src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
 <script is:inline src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
 
+<!-- SweetAlert2 JS -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+
 <!-- Import client scripts at the end -->
 
 <script src="../js/DataTables.js"></script>
+
+

@@ -5,6 +5,9 @@ import '../css/styles.css';
 import '../css/header.css';
 ---
 
+// Comando para correr el proyecto Astro:
+// npx astro dev
+
 <Layout>
 	<html lang="en">
 		<head>
@@ -88,19 +91,9 @@ import '../css/header.css';
 		  </div>
 		  
 		
-		  <!-- Formulario de las Salas -->
-		  <div class="row justify-content-center mt-5" id="salas" style="display: none;">
-			<div class="col-sm-4 shadow p-3">
-			  <h5 class="text-center">Reserva de Salas</h5>
-			  <div class="row text-center">
-				<button id="btn-reserva" class="btn btn-primary">Reservar Sala</button>
-			  </div>
-			  <button id="buttonHome" onclick="buttonHome()">Regresar</button>
-			</div>
 		
-		
-			<!-- Formulario de Nuevo Objeto de Inventario -->
-			<div class="row justify-content-center mt-5" id="newInventarioS" style="display: none;">
+			<!-- Formulario de Nueva Entrada de Inventario -->
+			<div class="row justify-content-center mt-5" id="newInventario" style="display: block;">
 				<button id="buttonHome" onclick="buttonHome()">Regresar</button>
 			</div>
 			
@@ -109,7 +102,7 @@ import '../css/header.css';
 		
 		
 		
-		  <div id="form-container" style="display: block;"></div>
+		  <div id="form-container">Hola Mundo</div>
 
 		  <!-- ===== TS ===== -->
 		  <script src="../js/header.js"></script>

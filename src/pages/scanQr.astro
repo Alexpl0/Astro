@@ -14,6 +14,7 @@ import '../css/header.css';
         <title>Document</title>
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        
         </head> 
     <body>
       <header class="header">
@@ -64,79 +65,11 @@ import '../css/header.css';
           
   </div>
 
-<div id="form-container" style="display: block;"></div>
-
-
 <!-- Formulario de Codigo QR -->
-<div id="formularioQR" style="display: none;">
-  <h2>Registro de Inventario</h2>
-  
-  <form action="/submit-inventory" method="post" id="inventory-form">
-      <label for="id">Id del Producto:</label>
-      <input type="text" id="id" name="id" readonly /><br><br>
-
-      <label for="nombre">Nombre del Producto:</label>
-      <input type="text" id="nombre" name="nombre" readonly /><br><br>
-
-      <label for="marca">Marca:</label>
-      <input type="text" id="marca" name="marca" readonly /><br><br>
-
-      <label for="modelo">Modelo:</label>
-      <input type="text" id="modelo" name="modelo" readonly /><br><br>
-
-      <label for="estado">Estado:</label>
-      <input type="text" id="estado" name="estado" readonly /><br><br>
-
-      <label for="descripcion">Descripción:</label>
-      <textarea id="descripcion" name="descripcion" readonly></textarea><br><br>
-
-      <label for="precio">Precio:</label>
-      <input type="text" id="precio" name="precio" readonly /><br><br>
-
-      <label for="fecha">Fecha de Inventario:</label>
-      <input type="text" id="fecha" name="fecha" readonly /><br><br>
-
-      <label for="categoria">Categoría:</label>
-      <input type="text" id="categoria" name="categoria" readonly /><br><br>
-
-      <label for="ubicacion">Ubicación:</label>
-      <input type="text" id="ubicacion" name="ubicacion" readonly /><br><br>
-
-      <button type="submit">Enviar</button>
-  </form>
-</div>
+<div id="newInventario"> </div>
 
 <!-- Otros elementos del cuerpo -->
 <button id="buttonHome" onclick="buttonHome()">Regresar</button>
-
-<!-- Define la función btnCheck -->
-<script>
-  function btnCheck() {
-    console.log("Botón de escanear QR presionado");
-  }
-</script>
-
-<!-- Agrega el script aquí -->
-<script>
-
-const camOnButton = document.getElementById('camOn');
-if (camOnButton) {
-    camOnButton.addEventListener('click', () => {
-        console.log('Botón de escanear QR presionado');
-    });
-}
-
-const  HolaMundo= () => {
-    console.log('HolaMundo');
-}
-
-// Define la función en el ámbito global
-function btnCheck() {
-    console.log("Botón de escanear QR presionado");
-}
-
-</script>
-
 
 </body>
 
@@ -151,9 +84,13 @@ function btnCheck() {
 <script src="https://cdn.jsdelivr.net/npm/qrcode-reader@1.0.4/dist/index.min.js"></script>
 <script is:inline src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<!-- Add this before your newQR.js script -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <!-- Import client scripts at the end -->
 
+<script src="../js/index.js"></script>
 <script src="../js/header.js"></script>
 <script src="../js/form.js"></script>
-<script src="../js/index.js"></script>
+
 

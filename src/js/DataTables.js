@@ -4,9 +4,10 @@ let dataTableIsInitialized = false;
 const dataTableOptions = {
     lengthMenu: [5, 10, 15, 20, 100, 200, 500],
     columnDefs: [
-        { className: "centered", targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
-        { orderable: false, targets: [9, 10] },
-        { searchable: false, targets: [1] }
+        { className: "centered", targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+        { orderable: false, targets: [10] }, // Solo la columna de acciones no es ordenable
+        { searchable: false, targets: [10] } // Solo la columna de acciones no es buscable
+        //Todas las columnas son buscables por defecto
     ],
     pageLength: 3,
     destroy: true,
@@ -55,7 +56,7 @@ const inventariocrud = async () => {
                     </td>
                 </tr>`;
         });
-        tableBody_users.innerHTML = content;
+        tableBody_productos.innerHTML = content;
     } catch (ex) {
         alert(ex);
     }
@@ -72,7 +73,7 @@ const initDataTable = async () => {
     await inventariocrud();
 
 
-    dataTable = $("#datatable_users").DataTable(dataTableOptions);
+    dataTable = $("#datatable_productos").DataTable(dataTableOptions);
 
     dataTableIsInitialized = true;
 };
@@ -80,20 +81,55 @@ const initDataTable = async () => {
 document.addEventListener('click', async (event) => {
     if (event.target && event.target.id === 'deletebtn') {
         const id = event.target.getAttribute('data-id');
-        const confirmed = confirm('¿Estás seguro de que deseas eliminar este elemento?');
-        if (confirmed) {
-            try {
-                const response = await fetch(`http://localhost:8080/productos/${id}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    alert('Elemento eliminado con éxito');
-                    await initDataTable(); // Recargar la tabla después de la eliminación
-                } else {
-                    alert('Error al eliminar el elemento');
+        
+        // Reemplazar confirm con SweetAlert2
+        try {
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¿Deseas eliminar este elemento?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`http://localhost:8080/productos/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Elemento eliminado con éxito',
+                            showConfirmButton: true,
+                            confirmButtonText: 'Aceptar',
+                        });
+                        await initDataTable(); // Recargar la tabla después de la eliminación
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo eliminar el elemento',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error al eliminar el elemento:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo eliminar el elemento: ' + error.message,
+                    });
                 }
-            } catch (error) {
-                alert('Error al eliminar el elemento despues del if');
+            }
+        } catch (swalError) {
+            console.error('Error al mostrar SweetAlert:', swalError);
+            // Fallback al confirm tradicional en caso de que SweetAlert falle
+            const confirmed = confirm('¿Estás seguro de que deseas eliminar este elemento?');
+            if (confirmed) {
+                // ... código de eliminación original ...
             }
         }
     }
@@ -189,7 +225,13 @@ document.addEventListener('click', async (event) => {
                 if (response.ok) {
                     $('#formulario').css('display', 'none'); // Hide the edit form container
                     document.getElementById('form').style.display = 'none';
-                    alert('Elemento actualizado con éxito'); // Show a success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Elemento actualizado con éxito',
+                        showConfirmButton: true,
+                        confirmButtonText: 'Aceptar',
+                    });
+
                     await initDataTable(); // Reload the data table to reflect the changes
                     
                 } else {
