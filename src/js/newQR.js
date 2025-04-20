@@ -134,9 +134,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                     allowOutsideClick: false,
                                 }).then((result) => {
                                     if (result.isConfirmed) {
+                                        //================================================================================================
+
                                         // Esta función se ejecutará si el usuario hace clic en "Imprimir QR"
-                                        console.log("Hola Mundo");
-                                        
+
                                         const newId = $('#uniqueid').text(); // Obtener el ID del formulario
                                         const newCat = $('#categoria').val(); // Obtener la categoría del formulario
 
@@ -184,6 +185,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                             qrcodeContainer.html('');
                                             qrcodeContainer.append(combinedCanvas);
                                         };
+                                    //================================================================================================
+
                                     }
                                 });
                             } else {

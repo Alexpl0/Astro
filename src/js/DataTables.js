@@ -1,13 +1,15 @@
-let dataTable;
+let dataTable; // Instancia DataTable de Productos
+let dataTableInventario; // Instancia DataTable de Inventario
+
 let dataTableIsInitialized = false;
+let dataTableInventarioIsInitialized = false;
 
 const dataTableOptions = {
     lengthMenu: [5, 10, 15, 20, 100, 200, 500],
     columnDefs: [
         { className: "centered", targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
-        { orderable: false, targets: [10] }, // Solo la columna de acciones no es ordenable
-        { searchable: false, targets: [10] } // Solo la columna de acciones no es buscable
-        //Todas las columnas son buscables por defecto
+        { orderable: false, targets: [10] },
+        { searchable: false, targets: [10] }
     ],
     pageLength: 3,
     destroy: true,
@@ -28,31 +30,32 @@ const dataTableOptions = {
     }
 };
 
-const tableBody_users = document.getElementById('tableBody_users');
+const tableBody_productos = document.getElementById('tableBody_productos');
+const tableBody_inventario = document.getElementById('tableBody_inventario');
 
 const inventariocrud = async () => {
     try {
-        const inventarioResponse = await fetch("http://localhost:8080/productos");
-        const inventario = await inventarioResponse.json();
+        const productoResponse = await fetch("http://localhost:8080/productos");
+        const producto = await productoResponse.json();
 
         let content = ``;
-        inventario.forEach((inventario, index) => {
+        producto.forEach((producto, index) => {
             content += `
                 <tr>
-                    <td>${inventario.id}</td>
-                    <td>${inventario.nombre}</td>
-                    <td>${inventario.marca}</td>
-                    <td>${inventario.modelo}</td>
-                    <td>${inventario.estado}</td>
-                    <td>${inventario.descripcion}</td>
-                    <td>${inventario.precio}</td>
-                    <td>${inventario.fecha}</td>
-                    <td>${inventario.categoria.nombre}</td> 
-                    <td>${inventario.ubicacion.nombre}</td>
+                    <td>${producto.id}</td>
+                    <td>${producto.nombre}</td>
+                    <td>${producto.marca}</td>
+                    <td>${producto.modelo}</td>
+                    <td>${producto.estado}</td>
+                    <td>${producto.descripcion}</td>
+                    <td>${producto.precio}</td>
+                    <td>${producto.fecha}</td>
+                    <td>${producto.categoria.nombre}</td> 
+                    <td>${producto.ubicacion.nombre}</td>
                     <td>
-                        <button id="editbtn" class="btn btn-sm btn-primary" data-id="${inventario.id}"><i class="fa-solid fa-pencil"></i></button>
-                        <button id="deletebtn" class="btn btn-sm btn-danger" data-id="${inventario.id}"><i class="fa-solid fa-trash-can"></i></button>
-                        <button id="qrbtn" class="btn btn-sm btn-info" data-id="${inventario.id}"><i class="fa-solid fa-qrcode"></i></button>
+                        <button id="editbtn" class="btn btn-sm btn-primary" data-id="${producto.id}"><i class="fa-solid fa-pencil"></i></button>
+                        <button id="deletebtn" class="btn btn-sm btn-danger" data-id="${producto.id}"><i class="fa-solid fa-trash-can"></i></button>
+                        <button id="qrbtn" class="btn btn-sm btn-info" data-id="${producto.id}"><i class="fa-solid fa-qrcode"></i></button>
                     </td>
                 </tr>`;
         });
@@ -62,27 +65,70 @@ const inventariocrud = async () => {
     }
 };
 
+const inventario = async () => {
+    try {
+        const inventarioResponse = await fetch("http://localhost:8080/inventario");
+        const inventario = await inventarioResponse.json();
+
+        let content = ``;
+        inventario.forEach((item, index) => {
+            content += `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.producto.nombre}</td>
+                    <td>${item.estado_fisico}</td>
+                    <td>${item.estado_operativo}</td>
+                    <td>${item.observaciones}</td>
+                    <td>${item.fecha}</td>
+                    <td>
+                        <button id="editbtn" class="btn btn-sm btn-primary" data-id="${item.id}"><i class="fa-solid fa-pencil"></i></button>
+                        <button id="deletebtn" class="btn btn-sm btn-danger" data-id="${item.id}"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>`;
+        });
+        tableBody_inventario.innerHTML = content;
+    } catch (ex) {
+        alert(ex);
+    }
+};
+
 const initDataTable = async () => {
-
-    
-
     if (dataTableIsInitialized) {
         dataTable.destroy();
     }
+    if (dataTableInventarioIsInitialized) {
+        dataTableInventario.destroy();
+    }
 
     await inventariocrud();
-
+    await inventario();
 
     dataTable = $("#datatable_productos").DataTable(dataTableOptions);
+    dataTableInventario = $("#datatable_inventario").DataTable({
+        ...dataTableOptions,
+        columnDefs: [
+            { className: "centered", targets: [0, 1, 2, 3, 4, 5, 6] },
+            { orderable: false, targets: [6] },
+            { searchable: false, targets: [6] }
+        ]
+    });
 
     dataTableIsInitialized = true;
+    dataTableInventarioIsInitialized = true;
 };
 
+// Delegación de eventos para diferenciar la tabla origen
 document.addEventListener('click', async (event) => {
-    if (event.target && event.target.id === 'deletebtn') {
-        const id = event.target.getAttribute('data-id');
-        
-        // Reemplazar confirm con SweetAlert2
+    const btn = event.target.closest('button');
+    if (!btn) return;
+
+    // Detectar de qué tabla viene el botón
+    const parentTable = btn.closest('table');
+    const isProductosTable = parentTable && parentTable.id === 'datatable_productos';
+    const isInventarioTable = parentTable && parentTable.id === 'datatable_inventario';
+
+    if (btn.id === 'deletebtn') {
+        const id = btn.getAttribute('data-id');
         try {
             const result = await Swal.fire({
                 title: '¿Estás seguro?',
@@ -94,12 +140,16 @@ document.addEventListener('click', async (event) => {
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
             });
-            
+
             if (result.isConfirmed) {
-                try {
-                    const response = await fetch(`http://localhost:8080/productos/${id}`, {
-                        method: 'DELETE'
-                    });
+                let url = '';
+                if (isProductosTable) {
+                    url = `http://localhost:8080/productos/${id}`;
+                } else if (isInventarioTable) {
+                    url = `http://localhost:8080/inventario/${id}`;
+                }
+                if (url) {
+                    const response = await fetch(url, { method: 'DELETE' });
                     if (response.ok) {
                         Swal.fire({
                             icon: 'success',
@@ -107,7 +157,7 @@ document.addEventListener('click', async (event) => {
                             showConfirmButton: true,
                             confirmButtonText: 'Aceptar',
                         });
-                        await initDataTable(); // Recargar la tabla después de la eliminación
+                        await initDataTable();
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -115,115 +165,105 @@ document.addEventListener('click', async (event) => {
                             text: 'No se pudo eliminar el elemento',
                         });
                     }
-                } catch (error) {
-                    console.error('Error al eliminar el elemento:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No se pudo eliminar el elemento: ' + error.message,
-                    });
                 }
             }
         } catch (swalError) {
             console.error('Error al mostrar SweetAlert:', swalError);
-            // Fallback al confirm tradicional en caso de que SweetAlert falle
-            const confirmed = confirm('¿Estás seguro de que deseas eliminar este elemento?');
-            if (confirmed) {
-                // ... código de eliminación original ...
-            }
         }
     }
 
-    if (event.target && event.target.id === 'editbtn') {
-        const id = event.target.getAttribute('data-id');
-        const inventarioResponse = await fetch(`http://localhost:8080/productos/${id}`);
+    if (btn.id === 'editbtn') {
+        const id = btn.getAttribute('data-id');
+        let fetchUrl = '';
+        if (isProductosTable) {
+            fetchUrl = `http://localhost:8080/productos/${id}`;
+        } else if (isInventarioTable) {
+            fetchUrl = `http://localhost:8080/inventario/${id}`;
+        }
+        if (!fetchUrl) return;
+
+        const inventarioResponse = await fetch(fetchUrl);
         const inventario = await inventarioResponse.json();
 
-        // Mostrar un formulario de edición con los datos del inventario
-        const editForm = `
+        // Mostrar un formulario de edición con los datos del producto
+        const editFormProductos = `
             <div id="form" class="contenedor">
                 <form action="" id="formulario" class="formulario">
                     <label for="unique-id">Identificador Único:</label>
                     <p id="unique-id">${id}</p><br><br>
-
                     <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" value="${inventario.nombre}" required><br><br>
-
+                    <input type="text" id="nombre" name="nombre" value="${isProductosTable ? inventario.nombre : inventario.producto.nombre}" required><br><br>
                     <label for="marca">Marca:</label>
-                    <input type="text" id="marca" name="marca" value="${inventario.marca}" required><br><br>
-
+                    <input type="text" id="marca" name="marca" value="${isProductosTable ? inventario.marca : (inventario.producto.marca || '')}" required><br><br>
                     <label for="modelo">Modelo:</label>
-                    <input type="text" id="modelo" name="modelo" value="${inventario.modelo}" required><br><br>
-
+                    <input type="text" id="modelo" name="modelo" value="${isProductosTable ? inventario.modelo : (inventario.producto.modelo || '')}" required><br><br>
                     <label for="estado">Estado:</label>
-                    <select id="estado" name="estado" required>
-                        <option value="Nuevo" ${inventario.estado === 'Nuevo' ? 'selected' : ''}>Nuevo</option>
-                        <option value="Como Nuevo" ${inventario.estado === 'Como Nuevo' ? 'selected' : ''}>Como Nuevo</option>
-                        <option value="Medio" ${inventario.estado === 'Medio' ? 'selected' : ''}>Medio</option>
-                        <option value="Malo" ${inventario.estado === 'Malo' ? 'selected' : ''}>Malo</option>
-                    </select><br><br>
-
+                    <input type="text" id="estado" name="estado" value="${isProductosTable ? inventario.estado : (inventario.producto.estado || '')}" required><br><br>
                     <label for="descripcion">Descripción detallada:</label>
-                    <textarea id="descripcion" name="descripcion" required>${inventario.descripcion}</textarea><br><br>
-
+                    <textarea id="descripcion" name="descripcion" required>${isProductosTable ? inventario.descripcion : (inventario.producto.descripcion || '')}</textarea><br><br>
                     <label for="precio">Precio:</label>
-                    <input type="text" id="precio" name="precio" value="${inventario.precio}" required><br><br>
-
-                    <label for="categoria">Categoría:</label>
-                    <select id="categoria" name="categoria" required>
-                        <option value="1" ${inventario.categoria.id === 1 ? 'selected' : ''}>Monitor</option>
-                        <option value="2" ${inventario.categoria.id === 2 ? 'selected' : ''}>Teclado</option>
-                        <option value="3" ${inventario.categoria.id === 3 ? 'selected' : ''}>Mouse</option>
-                        <option value="4" ${inventario.categoria.id === 4 ? 'selected' : ''}>CPU</option>
-                        <option value="5" ${inventario.categoria.id === 5 ? 'selected' : ''}>NoBreak</option>
-                    </select><br><br>
-                    
-                    <label for="ubicacion">Ubicación:</label>
-                    <select id="ubicacion" name="ubicacion" required>
-                        <option value="1" ${inventario.ubicacion.id === 1 ? 'selected' : ''}>Sala 1</option>
-                        <option value="2" ${inventario.ubicacion.id === 2 ? 'selected' : ''}>Sala 2</option>
-                    </select><br><br>
-
+                    <input type="text" id="precio" name="precio" value="${isProductosTable ? inventario.precio : (inventario.producto.precio || '')}" required><br><br>
                     <button id="actual" type="submit">Actualizar</button>
                 </form>
             </div>
         `;
+        const editFormInventario = `
+            <div id="form" class="contenedor">
+                <form action="" id="formulario" class="formulario">
+                    <label for="unique-id">Identificador Único:</label>
+                    <p id="unique-id">${id}</p><br><br>
+                    <label for="estado_fisico">Estado Físico:</label>
+                    <input type="text" id="estado_fisico" name="estado_fisico" value="${inventario.estado_fisico}" required><br><br>
+                    <label for="estado_operativo">Estado Operativo:</label>
+                    <input type="text" id="estado_operativo" name="estado_operativo" value="${inventario.estado_operativo}" required><br><br>
+                    <label for="observaciones">Observaciones:</label>
+                    <textarea id="observaciones" name="observaciones">${inventario.observaciones}</textarea><br><br>
+                    <button id="actual" type="submit">Actualizar</button>
+                </form>
+            </div>
+        `;
+        
+        // Determinar qué formulario mostrar según la tabla de origen
+        const editForm = isProductosTable ? editFormProductos : editFormInventario;
 
-        // Insert the edit form HTML into the container with id 'editFormContainer'
         $('#editFormContainer').html(editForm);
 
-        // Add an event listener to the button with id 'actual' to handle the form submission
         $('#actual').on('click', async function (e) {
-            e.preventDefault(); // Prevent the default form submission behavior
+            e.preventDefault();
 
-            // Create an object 'updatedInventario' with the updated values from the form inputs
-            const updatedInventario = {
-                nombre: $('#nombre').val(), // Get the value of the input with id 'nombre'
-                marca: $('#marca').val(), // Get the value of the input with id 'marca'
-                modelo: $('#modelo').val(), // Get the value of the input with id 'modelo'
-                estado: $('#estado').val(), // Get the value of the select with id 'estado'
-                descripcion: $('#descripcion').val(), // Get the value of the textarea with id 'descripcion'
-                precio: $('#precio').val(), // Get the value of the input with id 'precio'
-                ubicacion: { id: ($('#ubicacion').val()) }, // Get the value of the select with id 'ubicacion' and convert it to BigInt
-                categoria: { id: ($('#categoria').val()) }, // Get the value of the select with id 'categoria' and convert it to BigInt
-            };
+            let updatedData;
+            let putUrl = '';
 
-            const json = JSON.stringify(updatedInventario);
-            console.log(json);
+            if (isProductosTable) {
+                updatedData = {
+                    nombre: $('#nombre').val(),
+                    marca: $('#marca').val(),
+                    modelo: $('#modelo').val(),
+                    estado: $('#estado').val(),
+                    descripcion: $('#descripcion').val(),
+                    precio: $('#precio').val()
+                };
+                putUrl = `http://localhost:8080/productos/${id}`;
+            } else if (isInventarioTable) {
+                updatedData = {
+                    estado_fisico: $('#estado_fisico').val(),
+                    estado_operativo: $('#estado_operativo').val(),
+                    observaciones: $('#observaciones').val()
+                };
+                putUrl = `http://localhost:8080/inventario/${id}`;
+            } else {
+                return;
+            }
 
             try {
-                // Send a PUT request to update the inventory item with the specified id
-                const response = await fetch(`http://localhost:8080/productos/${id}`, {
-                    method: 'PUT', // Use the PUT method to update the resource
-                    headers: {
-                        'Content-Type': 'application/json' // Set the content type to JSON
-                    },
-                    body: JSON.stringify(updatedInventario) // Convert the 'updatedInventario' object to a JSON string
+                const response = await fetch(putUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
                 });
 
-                // Check if the response is OK (status code 200-299)
                 if (response.ok) {
-                    $('#formulario').css('display', 'none'); // Hide the edit form container
+                    $('#formulario').css('display', 'none');
                     document.getElementById('form').style.display = 'none';
                     Swal.fire({
                         icon: 'success',
@@ -231,81 +271,128 @@ document.addEventListener('click', async (event) => {
                         showConfirmButton: true,
                         confirmButtonText: 'Aceptar',
                     });
-
-                    await initDataTable(); // Reload the data table to reflect the changes
-                    
+                    await initDataTable();
                 } else {
-                    alert('Error al actualizar el elemento'); // Show an error message if the response is not OK
+                    alert('Error al actualizar el elemento');
                 }
             } catch (error) {
-                //alert('Error al actualizar el elemento Catch'); // Show an error message if there is an exception
+                alert('Error al actualizar el elemento');
             }
         });
     }
 
-    if (event.target && event.target.id === 'qrbtn') {
-        const id = event.target.getAttribute('data-id');
+    //================================================================================================
+    if (btn.id === 'qrbtn' && isProductosTable) {
 
-        // Crear un contenedor temporal para el QR
-        const tempContainer = document.createElement('div');
-        document.body.appendChild(tempContainer);
-
-        // Generar el código QR
-        const qrcode = new QRCode(tempContainer, {
-            text: id,
-            width: 96,
-            height: 96
-        });
-
-        // Obtener la imagen del QR generado
-        const qrImage = tempContainer.querySelector('img').src;
-
-        alert('QR Code generado con éxito');
-
-        // Eliminar el contenedor temporal
-        document.body.removeChild(tempContainer);
-
-        alert('Eliminar el contenedor temporal');
-        
-        // Crear un pop-up con la imagen del QR
-        const imagePopup = `
-            <div id="imagePopup" class="popup">
-                <div class="popup-content">
-                    <h2>QR Code ${id}</h2>
+        // Crear un modal para mostrar el QR
+        const qrModal = document.createElement('div');
+        qrModal.id = "qrModal";
+        qrModal.className = "modal";
+        qrModal.innerHTML = `
+            <div class="modal-content">
+                <div>
                     <span class="close">&times;</span>
-                    <img src="${qrImage}" alt="QR Code">
+                    <h2>Código QR</h2>
+                    <div id="qrcode-container"></div>
                 </div>
             </div>
         `;
+        document.body.appendChild(qrModal);
+        
 
-        // Insertar el pop-up en el cuerpo del documento
-       document.body.insertAdjacentHTML('beforeend', imagePopup);
 
-        // Mostrar el pop-up
-        const popup = document.getElementById('imagePopup');
-        popup.style.display = 'block';
+        const id = btn.getAttribute('data-id');
+        // Realiza el GET para obtener los datos del producto
+        const productoGet = await fetch(`http://localhost:8080/productos/${id}`, {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        });
+        if (!productoGet.ok) {
+            console.error('Error al obtener el producto:', productoGet.statusText);
+            return;
+        }
+        // Procesa la respuesta JSON
+        const producto = await productoGet.json(); // Datos del producto obtenido
 
-        // Cerrar el pop-up al hacer clic en la 'x'
-        document.querySelector('.close').onclick = function() {
-            popup.style.display = 'none';
-            popup.remove();
+        const idQR = producto.id; // ID del producto
+        const catQR = producto.categoria.id; // id de la categoria
+
+        // Crear un código QR
+        var qrcode = new QRCode(document.getElementById('qrcode-container'), {
+            text: JSON.stringify({
+                id: idQR,
+                categoria: catQR,
+            }),
+            width: 128,
+            height: 128
+        });
+
+        // Crear una imagen para el logo
+        var logo = new Image();
+        logo.src = '../media/images.jpg'; // Ruta al logo
+
+        // Esperar a que el logo cargue y superponerlo en el QR
+        logo.onload = function () {
+            var qrcodeContainer = $('#qrcode-container');
+            var canvas = qrcodeContainer.find('canvas')[0];
+
+            // Crear un nuevo canvas para combinar el QR y el logo
+            var combinedCanvas = document.createElement('canvas');
+            combinedCanvas.width = canvas.width;
+            combinedCanvas.height = canvas.height;
+
+            // Dibujar el QR en el nuevo canvas
+            var ctx = combinedCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, 0);
+
+            // Calcular la posición del logo
+            var logoSize = 30;
+            var x = (canvas.width - logoSize) / 2;
+            var y = (canvas.height - logoSize) / 2;
+
+            // Dibujar el logo en el nuevo canvas
+            ctx.drawImage(logo, x, y, logoSize, logoSize);
+
+            // Reemplazar el QR antiguo con el canvas combinado
+            qrcodeContainer.html('');
+            qrcodeContainer.append(combinedCanvas);
         };
 
-        // Descargar la imagen automáticamente sin redirigir
-        const downloadLink = document.getElementById('downloadLink');
-        downloadLink.addEventListener('click', function(event) {
-            event.preventDefault();
-            const a = document.createElement('a');
-            a.href = imageUrl;
-            a.download = `qr_code_${id}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-        downloadLink.click();
     }
+
+//================================================================================================
+
 });
 
 window.addEventListener("load", async () => {
     await initDataTable();
 });
+
+
+/*
+// Mostrar el modal
+        qrModal.style.display = "block";
+        // Cerrar el modal al hacer clic en la "X"
+        const closeModal = qrModal.querySelector('.close');
+        closeModal.onclick = function () {
+            qrModal.style.display = "none";
+            document.body.removeChild(qrModal); // Eliminar el modal del DOM
+        };
+        // Cerrar el modal al hacer clic fuera del contenido
+        window.onclick = function (event) {
+            if (event.target == qrModal) {
+                qrModal.style.display = "none";
+                document.body.removeChild(qrModal); // Eliminar el modal del DOM
+            }
+        };
+        // Cerrar el modal al presionar la tecla "Esc"
+        window.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") {
+                qrModal.style.display = "none";
+                document.body.removeChild(qrModal); // Eliminar el modal del DOM
+            }
+        });
+
+    */
