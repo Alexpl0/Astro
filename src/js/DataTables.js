@@ -212,10 +212,25 @@ document.addEventListener('click', async (event) => {
                 <form action="" id="formulario" class="formulario">
                     <label for="unique-id">Identificador Único:</label>
                     <p id="unique-id">${id}</p><br><br>
+
                     <label for="estado_fisico">Estado Físico:</label>
-                    <input type="text" id="estado_fisico" name="estado_fisico" value="${inventario.estado_fisico}" required><br><br>
+                    <select id="estado_fisico" name="estado_fisico" required>
+                        <option value="Nuevo" ${inventario.estado_fisico === 'Nuevo' ? 'selected' : ''}>Nuevo</option>
+                        <option value="Usado - Buen estado" ${inventario.estado_fisico === 'Usado - Buen estado' ? 'selected' : ''}>Usado - Buen estado</option>
+                        <option value="Usado - Con detalles" ${inventario.estado_fisico === 'Usado - Con detalles' ? 'selected' : ''}>Usado - Con detalles</option>
+                        <option value="Dañado" ${inventario.estado_fisico === 'Dañado' ? 'selected' : ''}>Dañado</option>
+                        <option value="Obsoleto" ${inventario.estado_fisico === 'Obsoleto' ? 'selected' : ''}>Obsoleto</option>
+                    </select><br><br>
+                    
                     <label for="estado_operativo">Estado Operativo:</label>
-                    <input type="text" id="estado_operativo" name="estado_operativo" value="${inventario.estado_operativo}" required><br><br>
+                    <select id="estado_operativo" name="estado_operativo" required>
+                        <option value="Funcional" ${inventario.estado_operativo === 'Funcional' ? 'selected' : ''}>Funcional</option>
+                        <option value="Funciona parcialmente" ${inventario.estado_operativo === 'Funciona parcialmente' ? 'selected' : ''}>Funciona parcialmente</option>
+                        <option value="En reparación" ${inventario.estado_operativo === 'En reparación' ? 'selected' : ''}>En reparación</option>
+                        <option value="No funcional" ${inventario.estado_operativo === 'No funcional' ? 'selected' : ''}>No funcional</option>
+                        <option value="Retirado de operación" ${inventario.estado_operativo === 'Retirado de operación' ? 'selected' : ''}>Retirado de operación</option>
+                    </select><br><br>
+                    
                     <label for="observaciones">Observaciones:</label>
                     <textarea id="observaciones" name="observaciones">${inventario.observaciones}</textarea><br><br>
                     <button id="actual" type="submit">Actualizar</button>
@@ -241,14 +256,19 @@ document.addEventListener('click', async (event) => {
                     modelo: $('#modelo').val(),
                     estado: $('#estado').val(),
                     descripcion: $('#descripcion').val(),
-                    precio: $('#precio').val()
+                    precio: $('#precio').val(),
+                    fecha: inventario.fecha,
+                    categoria: inventario.categoria.id,
+                    ubicacion: inventario.ubicacion.id
                 };
+                console.log(updatedData);
                 putUrl = `http://localhost:8080/productos/${id}`;
             } else if (isInventarioTable) {
                 updatedData = {
                     estado_fisico: $('#estado_fisico').val(),
                     estado_operativo: $('#estado_operativo').val(),
-                    observaciones: $('#observaciones').val()
+                    observaciones: $('#observaciones').val(),
+                    fecha: inventario.fecha,
                 };
                 putUrl = `http://localhost:8080/inventario/${id}`;
             } else {
@@ -273,54 +293,45 @@ document.addEventListener('click', async (event) => {
                     });
                     await initDataTable();
                 } else {
-                    alert('Error al actualizar el elemento');
+                    console.log('Error al actualizar el elemento antes del catch');
                 }
             } catch (error) {
-                alert('Error al actualizar el elemento');
+                console.log('Error al actualizar el elemento dentro del catch:');
             }
         });
     }
 
     //================================================================================================
     if (btn.id === 'qrbtn' && isProductosTable) {
-
-        // Crear un modal para mostrar el QR
-        const qrModal = document.createElement('div');
-        qrModal.id = "qrModal";
-        qrModal.className = "modal";
-        qrModal.innerHTML = `
-            <div class="modal-content">
-                <div>
-                    <span class="close">&times;</span>
-                    <h2>Código QR</h2>
-                    <div id="qrcode-container"></div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(qrModal);
-        
-
-
         const id = btn.getAttribute('data-id');
+        
         // Realiza el GET para obtener los datos del producto
         const productoGet = await fetch(`http://localhost:8080/productos/${id}`, {
             method: 'GET',
             headers: {
-            'Content-Type': 'application/json'
+                'Content-Type': 'application/json'
             }
         });
+        
         if (!productoGet.ok) {
             console.error('Error al obtener el producto:', productoGet.statusText);
             return;
         }
+        
         // Procesa la respuesta JSON
         const producto = await productoGet.json(); // Datos del producto obtenido
-
+    
         const idQR = producto.id; // ID del producto
         const catQR = producto.categoria.id; // id de la categoria
-
-        // Crear un código QR
-        var qrcode = new QRCode(document.getElementById('qrcode-container'), {
+    
+        // Crear un contenedor temporal para el QR
+        const tempQRContainer = document.createElement('div');
+        tempQRContainer.id = 'temp-qrcode-container';
+        tempQRContainer.style.display = 'none';
+        document.body.appendChild(tempQRContainer);
+        
+        // Crear un código QR en el contenedor temporal
+        var qrcode = new QRCode(tempQRContainer, {
             text: JSON.stringify({
                 id: idQR,
                 categoria: catQR,
@@ -328,38 +339,70 @@ document.addEventListener('click', async (event) => {
             width: 128,
             height: 128
         });
-
+    
         // Crear una imagen para el logo
         var logo = new Image();
         logo.src = '../media/images.jpg'; // Ruta al logo
-
+    
         // Esperar a que el logo cargue y superponerlo en el QR
-        logo.onload = function () {
-            var qrcodeContainer = $('#qrcode-container');
+        logo.onload = function() {
+            var qrcodeContainer = $(tempQRContainer);
             var canvas = qrcodeContainer.find('canvas')[0];
-
+    
             // Crear un nuevo canvas para combinar el QR y el logo
             var combinedCanvas = document.createElement('canvas');
             combinedCanvas.width = canvas.width;
             combinedCanvas.height = canvas.height;
-
+    
             // Dibujar el QR en el nuevo canvas
             var ctx = combinedCanvas.getContext('2d');
             ctx.drawImage(canvas, 0, 0);
-
+    
             // Calcular la posición del logo
             var logoSize = 30;
             var x = (canvas.width - logoSize) / 2;
             var y = (canvas.height - logoSize) / 2;
-
+    
             // Dibujar el logo en el nuevo canvas
             ctx.drawImage(logo, x, y, logoSize, logoSize);
-
-            // Reemplazar el QR antiguo con el canvas combinado
-            qrcodeContainer.html('');
-            qrcodeContainer.append(combinedCanvas);
+    
+            // Convertir el canvas a una imagen data URL
+            const qrImageUrl = combinedCanvas.toDataURL('image/png');
+            
+            // Eliminar el contenedor temporal
+            document.body.removeChild(tempQRContainer);
+            
+            // Mostrar el QR en un SweetAlert
+            Swal.fire({
+                title: 'Código QR',
+                html: `
+                    <div style="text-align: center;">
+                        <p>Producto: ${producto.nombre}</p>
+                        <img src="${qrImageUrl}" alt="QR Code" style="margin: 0 auto;">
+                    </div>
+                `,
+                width: 'auto',
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonText: 'Descargar',
+                focusConfirm: false,
+                preConfirm: () => {
+                    // Crear un enlace temporal para la descarga
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = qrImageUrl;
+                    // Establecer el nombre del archivo como "nombreProducto_ID.png"
+                    downloadLink.download = `${producto.nombre.replace(/\s+/g, '_')}_${producto.id}.png`;
+                    // Agregar el enlace al documento temporalmente
+                    document.body.appendChild(downloadLink);
+                    // Hacer clic en el enlace para iniciar la descarga
+                    downloadLink.click();
+                    // Remover el enlace temporal
+                    document.body.removeChild(downloadLink);
+                    // Evitar que se cierre el Sweet Alert después de la descarga
+                    return false;
+                }
+            });
         };
-
     }
 
 //================================================================================================

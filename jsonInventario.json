@@ -1,0 +1,26 @@
+{
+    "id": 1,
+    "estado_fisico": "Nuevo",
+    "estado_operativo": "Funcional",
+    "observaciones": "Teclado nuevo, sin uso.",
+    "fecha": "2025-04-18",
+    "producto": {
+        "id": 1,
+        "nombre": "NombreModificado23",
+        "marca": "Marca1",
+        "modelo": "Modelo1",
+        "estado": "Estado1",
+        "descripcion": "Ejemplo1",
+        "precio": 99.0,
+        "fecha": "2025-04-20",
+        "ubicacion": {
+            "id": 1,
+            "nombre": "Sala 1"
+        },
+        "categoria": {
+            "id": 1,
+            "nombre": "Mouse",
+            "descripcion": null
+        }
+    }
+}
