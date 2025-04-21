@@ -251,3 +251,12 @@ button:hover {
   max-width: 90vw;
   margin: auto;
 }
+
+/* Puedes poner esto en tu archivo styles.css */
+.table-responsive-limit {
+  max-width: 100%;
+  max-height: 500px; /* Ajusta la altura según lo que necesites */
+  overflow-x: auto;
+  overflow-y: auto;
+  margin: 0 auto;
+}

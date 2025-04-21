@@ -16,8 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let fileName = '';    // Guardará el nombre del archivo sin extensión
     // Nota: processedData ahora es global
     
+    // Ocultar el botón de conversión inicialmente
+    convertBtn.style.display = 'none';
+    
+    
     // Deshabilitar el botón putJson inicialmente
-    putJsonBtn.disabled = true;
+    putJsonBtn.style.display = 'none';
     
     // Configura un evento para detectar cuando el usuario selecciona un archivo
     fileInput.addEventListener('change', function(e) {
@@ -29,9 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
             fileName = file.name.split('.')[0];
             // Muestra información del archivo seleccionado incluyendo nombre y tamaño formateado
             fileInfo.textContent = `Archivo seleccionado: ${file.name} (${formatFileSize(file.size)})`;
+            // Mostrar el botón de conversión
+            convertBtn.style.display = 'block';
         } else {
             // Si no hay archivo seleccionado, limpia el texto informativo
             fileInfo.textContent = '';
+            // Ocultar el botón de conversión
+            convertBtn.style.display = 'none';
+
         }
     });
     
@@ -43,7 +52,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verifica si se ha seleccionado un archivo
         if (!file) {
             // Muestra alerta si no hay archivo y termina la ejecución
-            alert('Por favor, selecciona un archivo Excel primero.');
+            Swal.fire({
+                title: 'Archivo requerido',
+                text: 'Por favor, selecciona un archivo Excel primero.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
             return;
         }
         
@@ -103,17 +117,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const jsonString = JSON.stringify(result, null, 2);
                 jsonOutput.value = jsonString;
                 
-                // Habilitar botones después de la conversión exitosa
-                downloadBtn.disabled = false;
-                putJsonBtn.disabled = false;
+                // Ocultar el botón de conversión ya que el proceso fue exitoso
+                convertBtn.style.display = 'none';
+                
+                // Habilitar y mostrar el botón putJson
+                putJsonBtn.style.display = 'block';
+                downloadBtn.style.display = 'block';
+                
+                // Limpiar el input de archivo para evitar conversiones duplicadas
+                fileInput.value = '';
+                fileInfo.textContent = 'Archivo convertido exitosamente';
                 
                 // Mostrar notificación de éxito
                 Swal.fire({
                     title: '¡Archivo convertido!',
-                    text: 'El archivo Excel ha sido convertido a JSON con éxito.',
+                    text: 'El archivo Excel se procesó con éxito.',
                     icon: 'success',
                     confirmButtonText: '¡Entendido!'
                 });
+
+                
                 
             } catch (error) {
                 // Maneja cualquier error durante el procesamiento

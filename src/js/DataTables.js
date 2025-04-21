@@ -7,11 +7,10 @@ let dataTableInventarioIsInitialized = false;
 const dataTableOptions = {
     lengthMenu: [5, 10, 15, 20, 100, 200, 500],
     columnDefs: [
-        { className: "centered", targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
-        { orderable: false, targets: [10] },
-        { searchable: false, targets: [10] }
+        { className: "centered", targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
+        // Todas las columnas serán ordenables y buscables por defecto
     ],
-    pageLength: 3,
+    pageLength: 10,
     destroy: true,
     language: {
         lengthMenu: "Mostrar _MENU_ registros por página",
@@ -30,13 +29,17 @@ const dataTableOptions = {
     }
 };
 
-const tableBody_productos = document.getElementById('tableBody_productos');
-const tableBody_inventario = document.getElementById('tableBody_inventario');
-
 const inventariocrud = async () => {
     try {
         const productoResponse = await fetch("http://localhost:8080/productos");
         const producto = await productoResponse.json();
+
+        // Obtener la referencia aquí, cuando sabemos que el DOM está listo
+        const tableBody_productos = document.getElementById('tableBody_productos');
+        if (!tableBody_productos) {
+            console.error('No se encontró el elemento tableBody_productos');
+            return;
+        }
 
         let content = ``;
         producto.forEach((producto, index) => {
@@ -61,60 +64,80 @@ const inventariocrud = async () => {
         });
         tableBody_productos.innerHTML = content;
     } catch (ex) {
-        alert(ex);
+        console.error("Error en inventariocrud:", ex);
     }
 };
 
 const inventario = async () => {
     try {
         const inventarioResponse = await fetch("http://localhost:8080/inventario");
-        const inventario = await inventarioResponse.json();
+        const inventarioData = await inventarioResponse.json();
+
+        // Obtener la referencia
+        const tableBody_inventario = document.getElementById('tableBody_inventario');
+        if (!tableBody_inventario) {
+            console.error('No se encontró el elemento tableBody_inventario');
+            return;
+        }
 
         let content = ``;
-        inventario.forEach((item, index) => {
+        inventarioData.forEach((item, index) => {
             content += `
                 <tr>
                     <td>${item.id}</td>
-                    <td>${item.producto.nombre}</td>
-                    <td>${item.estado_fisico}</td>
-                    <td>${item.estado_operativo}</td>
-                    <td>${item.observaciones}</td>
-                    <td>${item.fecha}</td>
+                    <td>${item.producto ? item.producto.nombre : 'N/A'}</td>
+                    <td>${item.estado_fisico || 'N/A'}</td>
+                    <td>${item.estado_operativo || 'N/A'}</td>
+                    <td>${item.observaciones || 'N/A'}</td>
+                    <td>${item.fecha || 'N/A'}</td>
                     <td>
-                        <button id="editbtn" class="btn btn-sm btn-primary" data-id="${item.id}"><i class="fa-solid fa-pencil"></i></button>
-                        <button id="deletebtn" class="btn btn-sm btn-danger" data-id="${item.id}"><i class="fa-solid fa-trash-can"></i></button>
+                        <button id="editbtn" class="btn btn-sm btn-primary" data-id="${item.id}">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button id="deletebtn" class="btn btn-sm btn-danger" data-id="${item.id}">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </td>
                 </tr>`;
         });
         tableBody_inventario.innerHTML = content;
     } catch (ex) {
-        alert(ex);
+        console.error("Error en inventario:", ex);
     }
 };
 
-const initDataTable = async () => {
-    if (dataTableIsInitialized) {
-        dataTable.destroy();
+const initDataTable = () => {
+    try {
+        // Destruir instancias anteriores si existen
+        if (dataTableIsInitialized && dataTable) {
+            dataTable.destroy();
+        }
+        if (dataTableInventarioIsInitialized && dataTableInventario) {
+            dataTableInventario.destroy();
+        }
+        
+        // Para productos (11 columnas)
+        dataTable = $("#datatable_productos").DataTable({
+            ...dataTableOptions,
+            columnDefs: [
+                { className: "centered", targets: "_all" } // Todas las columnas centradas
+            ]
+        });
+        dataTableIsInitialized = true;
+        
+        // Para inventario (7 columnas)
+        dataTableInventario = $("#datatable_inventario").DataTable({
+            ...dataTableOptions,
+            columnDefs: [
+                { className: "centered", targets: "_all" } // Todas las columnas centradas
+            ]
+        });
+        dataTableInventarioIsInitialized = true;
+        
+        console.log("DataTables inicializadas correctamente");
+    } catch (error) {
+        console.error("Error al inicializar DataTable:", error);
     }
-    if (dataTableInventarioIsInitialized) {
-        dataTableInventario.destroy();
-    }
-
-    await inventariocrud();
-    await inventario();
-
-    dataTable = $("#datatable_productos").DataTable(dataTableOptions);
-    dataTableInventario = $("#datatable_inventario").DataTable({
-        ...dataTableOptions,
-        columnDefs: [
-            { className: "centered", targets: [0, 1, 2, 3, 4, 5, 6] },
-            { orderable: false, targets: [6] },
-            { searchable: false, targets: [6] }
-        ]
-    });
-
-    dataTableIsInitialized = true;
-    dataTableInventarioIsInitialized = true;
 };
 
 // Delegación de eventos para diferenciar la tabla origen
@@ -158,6 +181,7 @@ document.addEventListener('click', async (event) => {
                             confirmButtonText: 'Aceptar',
                         });
                         await initDataTable();
+                        location.reload();
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -258,8 +282,8 @@ document.addEventListener('click', async (event) => {
                     descripcion: $('#descripcion').val(),
                     precio: $('#precio').val(),
                     fecha: inventario.fecha,
-                    categoria: inventario.categoria.id,
-                    ubicacion: inventario.ubicacion.id
+                    categoria: {id: inventario.categoria.id},
+                    ubicacion: {id: inventario.ubicacion.id}
                 };
                 console.log(updatedData);
                 putUrl = `http://localhost:8080/productos/${id}`;
@@ -292,6 +316,7 @@ document.addEventListener('click', async (event) => {
                         confirmButtonText: 'Aceptar',
                     });
                     await initDataTable();
+                    location.reload();
                 } else {
                     console.log('Error al actualizar el elemento antes del catch');
                 }
@@ -409,8 +434,31 @@ document.addEventListener('click', async (event) => {
 
 });
 
-window.addEventListener("load", async () => {
-    await initDataTable();
+window.addEventListener("DOMContentLoaded", async () => {
+    try {
+        // Primero cargamos los datos
+        await inventariocrud();
+        await inventario();
+        
+        // Luego aseguramos que las tablas existen antes de inicializar DataTables
+        const checkTablesAndInitialize = () => {
+            const productosTable = document.getElementById('datatable_productos');
+            const inventarioTable = document.getElementById('datatable_inventario');
+            
+            if (productosTable && inventarioTable) {
+                // Ambas tablas existen, inicializar DataTables
+                initDataTable();
+            } else {
+                // Esperar un poco más si las tablas aún no existen
+                setTimeout(checkTablesAndInitialize, 200);
+            }
+        };
+        
+        // Iniciar el proceso de verificación
+        checkTablesAndInitialize();
+    } catch (error) {
+        console.error("Error en la carga de datos:", error);
+    }
 });
 
 
