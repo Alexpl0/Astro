@@ -1,14 +1,16 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 import '../css/styles.css';
 import '../css/header.css';
+
+// Get today's date in YYYY-MM-DD format for the date input
+const today = new Date().toISOString().split('T')[0];
 ---
 
-<!DOCTYPE html>
-<html lang="en">
+<Layout title="Reserva de Salas">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link
@@ -17,7 +19,7 @@ import '../css/header.css';
       integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
       crossorigin="anonymous"
     />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
   </head>
   <body>
     <header class="header">
@@ -28,7 +30,7 @@ import '../css/header.css';
           <ion-icon name="close-outline" class="nav__close" id="nav-close"></ion-icon>
           <div class="nav__perfil">
             <div class="nav__img">
-              <img src="/media/logo.jpg" alt="LogoIMT" />
+              <img src="/media/logo.jpg" alt="logoIMT" />
             </div>
             <div>
               <a href="#" class="nav__name">Instituto Mexicano del Transporte</a>
@@ -36,76 +38,76 @@ import '../css/header.css';
           </div>
           <div class="nav__menu">
             <ul class="nav__list">
-              <li class="nav__item">
-                <a href="/" class="nav__link">Home</a>
-              </li>
-              <li class="nav__item">
-                <a href="/scanQr" class="nav__link">Inventario</a>
-              </li>
-              <li class="nav__item">
-                <a href="/salas" class="nav__link active">Salas</a>
-              </li>
-              <li class="nav__item">
-                <a href="/newQR" class="nav__link">Alta Producto</a>
-              </li>
-              <li class="nav__item">
-                <a href="/ExcelToJson" class="nav__link">Subir Excel</a>
-              </li>
-              <li class="nav__item">
-                <a href="/DataTables" class="nav__link">Reportes</a>
-              </li>
+              <li class="nav__item"><a href="/" class="nav__link">Home</a></li>
+              <li class="nav__item"><a href="/scanQr" class="nav__link">Inventario</a></li>
+              <li class="nav__item"><a href="/salas" class="nav__link">Salas</a></li>
+              <li class="nav__item"><a href="/newQR" class="nav__link active">Alta Producto</a></li>
+              <li class="nav__item"><a href="/ExcelToJson" class="nav__link">Subir Excel</a></li>
+              <li class="nav__item"><a href="/DataTables" class="nav__link">Reportes</a></li>
             </ul>
           </div>
         </div>
       </nav>
     </header>
 
-    <main>
-      <h2>Reservar Sala de Conferencias</h2>
-      <form id="conference-room">
-        <div>
-          <label for="name">Nombre:</label>
-          <input type="text" id="name" name="name" required />
-        </div>
-        <div>
-          <label for="email">Correo Electrónico:</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div>
-          <label for="date">Fecha:</label>
-          <input type="date" id="date" name="date" required />
-        </div>
-        <div>
-          <label for="start-time">Hora de Inicio:</label>
-          <input type="time" id="start-time" name="start-time" required />
-        </div>
-        <div>
-          <label for="end-time">Hora de Fin:</label>
-          <input type="time" id="end-time" name="end-time" required />
-        </div>
-        <div>
-          <label for="room">Sala:</label>
-          <select id="room" name="room" required>
-            <option value="sala1">Sala 1</option>
-            <option value="sala2">Sala 2</option>
+  <main>
+    <h2>Reservar Sala de Conferencias</h2>
+    <form id="conference-room" class="salas-form">
+      <div>
+        <label for="nombreReservador">Nombre del reservador:</label>
+        <input type="text" id="nombreReservador" name="nombreReservador" required />
+      </div>
+      <div>
+        <label for="motivo">Motivo:</label>
+        <textarea id="motivo" name="motivo" required></textarea>
+      </div>
+      <div>
+        <label for="cantidadPersonas">Cantidad de personas:</label>
+        <input type="number" id="cantidadPersonas" name="cantidadPersonas" min="1" required />
+      </div>
+      <div>
+        <label for="fecha">Fecha de Creacion:</label>
+        <input type="date" id="fecha" name="fecha" readonly value={today} />
+      </div>
+      <div>
+        <label for="fechaEntrada">Fecha y hora de entrada:</label>
+        <div class="datetime-input">
+          <input type="date" id="fechaEntradaDate" name="fechaEntradaDate" required />
+          <select id="fechaEntradaTime" name="fechaEntradaTime" required class="time-select">
+            <!-- Opciones generadas por JS -->
           </select>
+          <input type="hidden" id="fechaEntrada" name="fechaEntrada" />
         </div>
-        <div>
-          <button type="submit">Reservar</button>
+      </div>
+      <div>
+        <label for="fechaSalida">Fecha y hora de salida:</label>
+        <div class="datetime-input">
+          <input type="date" id="fechaSalidaDate" name="fechaSalidaDate" required />
+          <select id="fechaSalidaTime" name="fechaSalidaTime" required class="time-select">
+            <!-- Opciones generadas por JS -->
+          </select>
+          <input type="hidden" id="fechaSalida" name="fechaSalida" />
         </div>
-      </form>
-      <button id="buttonHome" onclick="buttonHome()">Regresar</button>
-    </main>
+      </div>
+      <div>
+        <label for="sala">Sala:</label>
+        <select id="sala" name="sala" required>
+          <option value="1">Sala 1</option>
+          <option value="2">Sala 2</option>
+        </select>
+      </div>
+      <div>
+        <button type="submit">Reservar</button>
+      </div>
+    </form>
+    <button id="buttonHome" onclick="buttonHome()">Regresar</button>
+  </main>
 
-    <!-- ===== JS ===== -->
-    <script src="../js/form.js"></script>
-    <script src="../js/header.js"></script>
-    <script src="../js/index.js"></script>
-
-    <!-- ===== IMPORTS ===== -->
-    <script src="../assets/plugins/qrCode.min.js"></script>
-
-    <!-- ===== IONICONS ===== -->
-    <script is:inline src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
-  </body>
-</html>
+  <!-- Scripts necesarios dentro del Layout -->
+  <script is:inline src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script is:inline src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js"></script>
+  <script src="../js/salas.js"></script>
+  <script src="../js/header.js"></script>
+</Layout>

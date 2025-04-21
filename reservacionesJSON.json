@@ -1,0 +1,14 @@
+{
+    "id": 2,
+    "fechaEntrada": "2025-05-03T09:00:00",
+    "fechaSalida": "2025-05-03T11:30:00",
+    "motivo": "Capacitación interna",
+    "cantidadPersonas": 8,
+    "fechaReservacion": "2025-05-01T16:00:00",
+    "nombreReservador": "Luis Gómez",
+    "sala": {
+        "id": 2,
+        "nombre": "Sala 2",
+        "capacidad": 15
+    }
+}
