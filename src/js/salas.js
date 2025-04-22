@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('fechaEntradaTime').addEventListener('change', updateSalidaOptions);
   fechaSalidaDateEl.addEventListener('change', updateSalidaOptions);
 
-  form.addEventListener('submit', function(e) {
+  form.addEventListener('submit', async function(e) {
     e.preventDefault();
 
     // Obtener valores de los campos
@@ -141,7 +141,35 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     };
 
+    
+
     console.log(JSON.stringify(reservationData, null, 2));
+
+    // Aquí puedes enviar la reservación al servidor usando fetch
+  try {
+    const response = await fetch('http://localhost:8080/inventario', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(reservationData)
+    });
+
+    if (!response.ok) {
+      throw new Error('Error en la reservación');
+    }
+
+    const responseData = await response.json();
+    console.log(responseData);
+  } catch (error) {
+    console.error('Error:', error);
+    Swal.fire({
+      title: 'Error',
+      text: 'Hubo un problema al realizar la reservación',
+      icon: 'error'
+    });
+    return;
+  }
 
     // Mostrar mensaje de éxito con SweetAlert
     Swal.fire({
