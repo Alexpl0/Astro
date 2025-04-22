@@ -461,29 +461,38 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+document.addEventListener('DOMContentLoaded', async function() {
+  // Supón que reservas es tu array de objetos JSON
+  const reservas = await fetch('http://localhost:8080/reservaciones').then(r => r.json());
 
-/*
-// Mostrar el modal
-        qrModal.style.display = "block";
-        // Cerrar el modal al hacer clic en la "X"
-        const closeModal = qrModal.querySelector('.close');
-        closeModal.onclick = function () {
-            qrModal.style.display = "none";
-            document.body.removeChild(qrModal); // Eliminar el modal del DOM
-        };
-        // Cerrar el modal al hacer clic fuera del contenido
-        window.onclick = function (event) {
-            if (event.target == qrModal) {
-                qrModal.style.display = "none";
-                document.body.removeChild(qrModal); // Eliminar el modal del DOM
-            }
-        };
-        // Cerrar el modal al presionar la tecla "Esc"
-        window.addEventListener('keydown', function (event) {
-            if (event.key === "Escape") {
-                qrModal.style.display = "none";
-                document.body.removeChild(qrModal); // Eliminar el modal del DOM
-            }
-        });
+  // Mapea las reservas al formato de eventos de FullCalendar
+  const eventos = reservas.map(r => ({
+    id: r.id,
+    title: `${r.sala.nombre}: ${r.motivo} (${r.nombreReservador})`,
+    start: r.fechaEntrada,
+    end: r.fechaSalida,
+    extendedProps: {
+      cantidadPersonas: r.cantidadPersonas,
+      sala: r.sala.nombre
+    }
+  }));
 
-    */
+  // Inicializa el calendario
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    events: eventos,
+    eventClick: function(info) {
+      Swal.fire({
+        title: `Reserva en ${info.event.extendedProps.sala}`,
+        html: `
+          <b>Motivo:</b> ${info.event.title}<br>
+          <b>Personas:</b> ${info.event.extendedProps.cantidadPersonas}
+        `,
+        icon: 'info',
+        confirmButtonText: 'Cerrar'
+      });
+    }
+  });
+  calendar.render();
+});

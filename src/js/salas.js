@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Aquí puedes enviar la reservación al servidor usando fetch
   try {
-    const response = await fetch('http://localhost:8080/inventario', {
+    const response = await fetch('http://localhost:8080/reservaciones', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json'

@@ -320,6 +320,12 @@ button:hover {
 }
 
 #buttonHome {
-  background-color: #6c757d;
+  background-color: #611332;
   margin-top: 20px;
+  border-radius: 10px;
+}
+
+main {
+  margin-top: 10%;
+  padding-bottom: 5%;
 }
